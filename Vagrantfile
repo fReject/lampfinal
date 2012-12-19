@@ -8,41 +8,44 @@ Vagrant::Config.run do |config|
 
   # Every Vagrant virtual environment requires a box to build off of.
   #config.vm.box = "base"
-  config.vm.box ="frederikbox"
+  config.vm.box ="frederikbox2"
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
   # config.vm.box_url = "http://domain.com/path/to/above.box"
-  config.vm.box_url = "http://downloads.vagrantup.com/tags/v1.0.5"
+  #config.vm.box_url = "http://downloads.vagrantup.com/tags/v1.0.5"
+
+config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+
   # Boot with a GUI so you can see the screen. (Default is headless)
-  # config.vm.boot_mode = :gui
+   config.vm.boot_mode = :gui
 
   #netwerk settings
   config.vm.host_name ="lampsrvFred"
   config.vm.network :hostonly, "192.168.56.10"
   config.vm.forward_port 80, 8080
-  config.vm.share_folder "www", "C:\vagrant\vagrant\vagrantbestand\www","www"
+  config.vm.share_folder "www", "/var/www","www"
   
   #chef solo
   config.vm.provision :chef_solo do |chef|
   chef.cookbooks_path = "cookbooks"
-  #chef.add_recipe= "apt"
-  #chef.add_recipe "openssl"
-  #chef.add_recipe "apache2"
-  #chef.add_recipe "mysql"
-  #chef.add_recipe "mysql::server"
-  #chef.add_recipe "php"
-  #chef.add_recipe "php::module_apc"
-  #chef.add_recipe "php::module_curl"
-  #chef.add_recipe "php::module_mysql"
-  #chef.add_recipe "apache2::mod_php5"
-  #chef.add_recipe "apache2::mod_rewrite"
-  #chef.json = {
-  #    :mysql => {
-  #        :server_root_password => 'root',
-  #        :bind_address => '127.0.0.1'
-  #    }
-  #} 
+  chef.add_recipe "apt"
+  chef.add_recipe "openssl"
+  chef.add_recipe "apache2"
+  chef.add_recipe "mysql"
+  chef.add_recipe "mysql::server"
+  chef.add_recipe "php"
+  chef.add_recipe "php::module_apc"
+  chef.add_recipe "php::module_curl"
+  chef.add_recipe "php::module_mysql"
+  chef.add_recipe "apache2::mod_php5"
+  chef.add_recipe "apache2::mod_rewrite"
+  chef.json = {
+      :mysql => {
+          :server_root_password => 'root',
+          :bind_address => '127.0.0.1'
+      }
+  } 
   end
   
   
