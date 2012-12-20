@@ -62,7 +62,7 @@ end
   directory dirname do
     owner "root"
     group "root"
-    mode  00755
+    mode  0644
     action :create
   end
 end

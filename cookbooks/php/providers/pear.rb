@@ -26,10 +26,6 @@ include Chef::Mixin::ShellOut
 # the Chef::Provider::Package which will make
 # refactoring into core chef easy
 
-def whyrun_supported?
-  true
-end
-
 action :install do
   # If we specified a version, and it's not the current version, move to the specified version
   if @new_resource.version != nil && @new_resource.version != @current_resource.version
@@ -40,10 +36,10 @@ action :install do
   end
 
   if install_version
-    description = "install package #{@new_resource} #{install_version}"
-    converge_by(description) do
-       Chef::Log.info("Installing #{@new_resource} version #{install_version}")
-       status = install_package(@new_resource.package_name, install_version)
+    Chef::Log.info("Installing #{@new_resource} version #{install_version}")
+    status = install_package(@new_resource.package_name, install_version)
+    if status
+      new_resource.updated_by_last_action(true)
     end
   end
 end
@@ -51,32 +47,28 @@ end
 action :upgrade do
   if @current_resource.version != candidate_version
     orig_version = @current_resource.version || "uninstalled"
-    description = "upgrade package #{@new_resource} version from #{orig_version} to #{candidate_version}"
-    converge_by(description) do
-       Chef::Log.info("Upgrading #{@new_resource} version from #{orig_version} to #{candidate_version}")
-       status = upgrade_package(@new_resource.package_name, candidate_version)
+    Chef::Log.info("Upgrading #{@new_resource} version from #{orig_version} to #{candidate_version}")
+    status = upgrade_package(@new_resource.package_name, candidate_version)
+    if status
+      new_resource.updated_by_last_action(true)
     end
   end
 end
 
 action :remove do
   if removing_package?
-    description = "remove package #{@new_resource}"
-    converge_by(description) do
-       Chef::Log.info("Removing #{@new_resource}")
-       remove_package(@current_resource.package_name, @new_resource.version)
-    end
+    Chef::Log.info("Removing #{@new_resource}")
+    remove_package(@current_resource.package_name, @new_resource.version)
+    new_resource.updated_by_last_action(true)
   else
   end
 end
 
 action :purge do
   if removing_package?
-    description = "purge package #{@new_resource}"
-    converge_by(description) do
-       Chef::Log.info("Purging #{@new_resource}")
-       purge_package(@current_resource.package_name, @new_resource.version)
-    end
+    Chef::Log.info("Purging #{@new_resource}")
+    purge_package(@current_resource.package_name, @new_resource.version)
+    new_resource.updated_by_last_action(true)
   end
 end
 
@@ -248,15 +240,15 @@ def pecl?
   @pecl ||= begin
     # search as a pear first since most 3rd party channels will report pears as pecls!
     search_cmd = "pear -d preferred_state=#{can_haz(@new_resource, "preferred_state")} search#{expand_channel(can_haz(@new_resource, "channel"))} #{@new_resource.package_name}"
-    if shell_out(search_cmd).stdout.find { |line| line =~ /^#{@new_resource.package_name}\s\d+\.\d+\.\d+/ }
+    if shell_out(search_cmd).stdout =~ /\.?Matched packages/i
       false
     else
       # fall back and search as a pecl
       search_cmd = "pecl -d preferred_state=#{can_haz(@new_resource, "preferred_state")} search#{expand_channel(can_haz(@new_resource, "channel"))} #{@new_resource.package_name}"
-      if shell_out(search_cmd).stdout.find { |line| line =~ /^#{@new_resource.package_name}\s\d+\.\d+\.\d+/ }
+      if shell_out(search_cmd).stdout =~ /\.?Matched packages/i
         true
       else
-        raise "Package #{@new_resource.package_name} not found in either PEAR or PECL."
+        false
       end
     end
   end

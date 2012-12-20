@@ -7,51 +7,16 @@ Vagrant::Config.run do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  #config.vm.box = "base"
-  config.vm.box ="precise32"
+  config.vm.box = "precise32"
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
   # config.vm.box_url = "http://domain.com/path/to/above.box"
-  #config.vm.box_url = "http://downloads.vagrantup.com/tags/v1.0.5"
-
-config.vm.box_url = "http://files.vagrantup.com/precise32.box"
-
+  config.vm.box_url = "http://files.vagrantup.com/precise32.box" 
+ 
   # Boot with a GUI so you can see the screen. (Default is headless)
-   config.vm.boot_mode = :gui
+    config.vm.boot_mode = :gui
 
-  #netwerk settings
-  config.vm.host_name ="lampsrvF"
-  config.vm.network :hostonly, "192.168.56.15"
-  #config.vm.forward_port 80, 8080
-  config.vm.share_folder "www", "/var/www","www"
-  
-  #chef solo
-  config.vm.provision :chef_solo do |chef|
-  chef.cookbooks_path = "cookbooks"
-  chef.add_recipe "apt"
-  chef.add_recipe "openssl"
-  chef.add_recipe "apache2"
-  chef.add_recipe "mysql"
-  chef.add_recipe "mysql::server"
-  chef.add_recipe "php"
-  chef.add_recipe "php::module_apc"
-  chef.add_recipe "php::module_curl"
-  chef.add_recipe "php::module_mysql"
-  chef.add_recipe "apache2::mod_php5"
-  chef.add_recipe "apache2::mod_rewrite"
-  chef.json = {
-      :mysql => {
-          :server_root_password => 'root',
-	  :server_repl_password => 'root',
-	  :server_debian_password => 'root',
-          :bind_address => '127.0.0.1'
-      }
-  } 
-  end
-  
-  
-  
   # Assign this VM to a host-only network IP, allowing you to access it
   # via the IP. Host-only networks can talk to the host machine as well as
   # any other machines on the same network, but cannot be accessed (through this
@@ -132,4 +97,35 @@ config.vm.box_url = "http://files.vagrantup.com/precise32.box"
   # chef-validator, unless you changed the configuration.
   #
   #   chef.validation_client_name = "ORGNAME-validator"
+
+ #Instellingen voor het netwerk
+ config.vm.host_name = "lampsrvF"
+ config.vm.network :hostonly, "192.168.56.15"
+ config.vm.share_folder "www", "/var/www/", "www" 
+
+#Toevoegen van de cookbooks
+config.vm.provision :chef_solo do |chef|
+    chef.cookbooks_path = "cookbooks"
+    chef.add_recipe "apt"
+    chef.add_recipe "openssl"
+    chef.add_recipe "apache2"
+    chef.add_recipe "mysql"
+    chef.add_recipe "mysql::server"
+    chef.add_recipe "php"
+    chef.add_recipe "php::module_apc"
+    chef.add_recipe "php::module_curl"
+    chef.add_recipe "php::module_mysql"
+    chef.add_recipe "apache2::mod_php5"
+    chef.add_recipe "apache2::mod_rewrite"
+    chef.json = {
+        :mysql => {
+            :server_root_password => 'root',
+ 	    :server_repl_password => 'root',
+	    :server_debian_password => 'root',
+            :bind_address => '127.0.0.1'
+	}
+        
+    } 
 end
+end
+#
